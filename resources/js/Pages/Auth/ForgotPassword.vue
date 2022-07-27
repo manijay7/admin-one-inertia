@@ -1,49 +1,88 @@
+<script>
+import Guest from "@/Layouts/Guest.vue";
+export default {
+  layout: Guest,
+};
+</script>
+
 <script setup>
-import BreezeButton from '@/Components/Button.vue';
-import BreezeGuestLayout from '@/Layouts/Guest.vue';
-import BreezeInput from '@/Components/Input.vue';
-import BreezeLabel from '@/Components/Label.vue';
-import BreezeValidationErrors from '@/Components/ValidationErrors.vue';
-import { Head, useForm } from '@inertiajs/inertia-vue3';
+import { useLayoutStore } from "@/stores/layout.js";
+import { useForm, Head, Link } from "@inertiajs/inertia-vue3";
+import { mdiEmail } from "@mdi/js";
+import SectionFullScreen from "@/components/SectionFullScreen.vue";
+import CardBox from "@/components/CardBox.vue";
+import FormField from "@/components/FormField.vue";
+import FormControl from "@/components/FormControl.vue";
+import BaseDivider from "@/components/BaseDivider.vue";
+import BaseButton from "@/components/BaseButton.vue";
+import FormValidationErrors from "@/components/FormValidationErrors.vue";
+import NotificationBarInCard from "@/components/NotificationBarInCard.vue";
+import BaseLevel from "@/components/BaseLevel.vue";
 
 defineProps({
-    status: String,
+  status: {
+    type: String,
+    default: null,
+  },
 });
 
 const form = useForm({
-    email: '',
+  email: "",
 });
 
+useLayoutStore().fullScreenToggle(true);
+
 const submit = () => {
-    form.post(route('password.email'));
+  form.post(route("password.email"));
 };
 </script>
 
 <template>
-    <BreezeGuestLayout>
-        <Head title="Forgot Password" />
+  <Head title="Forgot Password" />
 
+  <SectionFullScreen v-slot="{ cardClass, cardRounded }" bg="login">
+    <CardBox
+      :class="cardClass"
+      :rounded="cardRounded"
+      form
+      @submit.prevent="submit"
+    >
+      <FormValidationErrors />
+
+      <NotificationBarInCard v-if="status" color="info">
+        {{ status }}
+      </NotificationBarInCard>
+
+      <FormField>
         <div class="mb-4 text-sm text-gray-600">
-            Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.
+          Forgot your password? No problem. Just let us know your email address
+          and we will email you a password reset link that will allow you to
+          choose a new one.
         </div>
+      </FormField>
 
-        <div v-if="status" class="mb-4 font-medium text-sm text-green-600">
-            {{ status }}
-        </div>
+      <FormField label="Email" help="Please enter your email">
+        <FormControl
+          v-model="form.email"
+          :icon="mdiEmail"
+          autocomplete="email"
+          type="email"
+          required
+        />
+      </FormField>
 
-        <BreezeValidationErrors class="mb-4" />
+      <BaseDivider />
 
-        <form @submit.prevent="submit">
-            <div>
-                <BreezeLabel for="email" value="Email" />
-                <BreezeInput id="email" type="email" class="mt-1 block w-full" v-model="form.email" required autofocus autocomplete="username" />
-            </div>
-
-            <div class="flex items-center justify-end mt-4">
-                <BreezeButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                    Email Password Reset Link
-                </BreezeButton>
-            </div>
-        </form>
-    </BreezeGuestLayout>
+      <BaseLevel>
+        <BaseButton
+          type="submit"
+          color="info"
+          label="Email link"
+          :class="{ 'opacity-25': form.processing }"
+          :disabled="form.processing"
+        />
+        <Link :href="route('login')"> Back to login </Link>
+      </BaseLevel>
+    </CardBox>
+  </SectionFullScreen>
 </template>
